@@ -228,8 +228,6 @@ window.onload = function () {
     };
 
     $scope.getHash = function () {
-      $scope.hashTxt = document.location.origin + document.location.pathname + '#!/' + encodeURIComponent($scope.text);
-      $scope.showModal = true;
     };
 
     $scope.closeModal = function () {
@@ -266,27 +264,19 @@ window.onload = function () {
 
     $scope.updateOptions();
 
-    // get text from URL or load the default text
-    if (window.location.hash) {
-      var hashText = window.location.hash.replace(/^#!(/)?/, '');
-      console.log(window.location.hash, hashText);
-      hashText = decodeURIComponent(hashText);
-      $scope.text = hashText;
-    } else {
-      var defHtml = $http.get('md/text.md');
-      defHtml
-        .then(function(res) {
-          $scope.text = res.data;
-          return $http.get('//raw.githubusercontent.com/wiki/showdownjs/showdown/Showdown\'s-Markdown-syntax.md');
-        })
-        .then(function(res) {
-          $scope.text = $scope.text + '\n\n' + res.data;
-        })
-        .catch(function (error) {
-          $scope.text = '';
-          console.log(error);
-        });
-      }
+    var defHtml = $http.get('md/text.md');
+    defHtml
+      .then(function(res) {
+        $scope.text = res.data;
+        return $http.get('//raw.githubusercontent.com/wiki/showdownjs/showdown/Showdown\'s-Markdown-syntax.md');
+      })
+      .then(function(res) {
+        $scope.text = $scope.text + '\n\n' + res.data;
+      })
+      .catch(function (error) {
+        $scope.text = '';
+        console.log(error);
+      });
   }]);
 
   angular.bootstrap(document, ['showdown.editor']);
