@@ -12,40 +12,18 @@ window.onload = function () {
         .filter('sdStripHtml', ['$showdown', stripHtmlFilter]) //<-- DEPRECATED: will be removed in the next major version release
         .filter('stripHtml', ['$showdown', stripHtmlFilter]);
 
-      /**
-       * Angular Provider
-       * Enables configuration of showdown via angular.config and Dependency Injection into controllers, views
-       * directives, etc... This assures the directives and filters provided by the library itself stay consistent
-       * with the user configurations.
-       * If the user wants to use a different configuration in a determined context, he can use the "classic" Showdown
-       * object instead.
-       */
       function ngShowdown() {
-
-        // Configuration parameters for Showdown
         var config = {
           extensions: [],
           sanitize: false
         };
 
-        /**
-         * Sets a configuration option
-         *
-         * @param {string} key Config parameter key
-         * @param {string} value Config parameter value
-         */
         /* jshint validthis: true */
         this.setOption = function (key, value) {
           config[key] = value;
           return this;
         };
 
-        /**
-         * Gets the value of the configuration parameter specified by key
-         *
-         * @param {string} key The config parameter key
-         * @returns {string|null} Returns the value of the config parameter. (or null if the config parameter is not set)
-         */
         this.getOption = function (key) {
           if (config.hasOwnProperty(key)) {
             return config[key];
@@ -54,102 +32,49 @@ window.onload = function () {
           }
         };
 
-        /**
-         * Loads a Showdown Extension
-         *
-         * @param {string} extensionName The name of the extension to load
-         */
         this.loadExtension = function (extensionName) {
           config.extensions.push(extensionName);
-
           return this;
         };
 
         function SDObject() {
           var converter = new showdown.Converter(config);
 
-          /**
-           * Converts a markdown text into HTML
-           *
-           * @param {string} markdown The markdown string to be converted to HTML
-           * @returns {string} The converted HTML
-           */
           this.makeHtml = function (markdown) {
             return converter.makeHtml(markdown);
           };
 
-          /**
-           * Strips a text of it's HTML tags. See http://stackoverflow.com/questions/17289448/angularjs-to-output-plain-text-instead-of-html
-           *
-           * @param {string} text
-           * @returns {string}
-           */
           this.stripHtml = function (text) {
             return String(text).replace(/<[^>]+>/gm, '');
           };
 
-          /**
-           * Gets the value of the configuration parameter of CONVERTER specified by key
-           * @param {string} key The config parameter key
-           * @returns {*}
-           */
           this.getOption = function (key) {
             return converter.getOption(key);
           };
 
-          /**
-           * Gets the converter configuration params
-           * @returns {*}
-           */
           this.getOptions = function () {
             return converter.getOptions();
           };
 
-          /**
-           * Sets a configuration option
-           *
-           * @param {string} key Config parameter key
-           * @param {string} value Config parameter value
-           * @returns {SDObject}
-           */
           this.setOption = function (key, value) {
             converter.setOption(key, value);
             return this;
           };
 
-          /**
-           * Get showdown's default options
-           *
-           * @param simple
-           */
           this.getDefaultOptions = function(simple) {
             if (typeof showdown.getDefaultOptions !== 'undefined') {
               return showdown.getDefaultOptions(simple);
             } else {
               return null;
             }
-
           }
         }
 
-        // The object returned by service provider
         this.$get = function () {
           return new SDObject();
         };
       }
 
-      /**
-       * @deprecated
-       * Legacy AngularJS Directive to Md to HTML transformation
-       *
-       * Usage example:
-       * <div sd-model-to-html="markdownText" ></div>
-       *
-       * @param {showdown.Converter} $showdown
-       * @param {$sanitize} $sanitize
-       * @param {$sce} $sce
-       * @returns {*}
-       */
       function sdModelToHtmlDirective($showdown, $sanitize, $sce) {
         return {
           restrict: 'A',
@@ -161,17 +86,6 @@ window.onload = function () {
         };
       }
 
-      /**
-       * AngularJS Directive to Md to HTML transformation
-       *
-       * Usage example:
-       * <div markdown-to-html="markdownText" ></div>
-       *
-       * @param {showdown.Converter} $showdown
-       * @param {$sanitize} $sanitize
-       * @param {$sce} $sce
-       * @returns {*}
-       */
       function markdownToHtmlDirective($showdown, $sanitize, $sce) {
         return {
           restrict: 'A',
@@ -185,25 +99,34 @@ window.onload = function () {
 
       function getLinkFn($showdown, $sanitize, $sce) {
         return function (scope, element, attrs) {
-          scope.$watch('model', function (newValue) {
+          function render(newValue) {
             var showdownHTML;
             if (typeof newValue === 'string') {
               showdownHTML = $showdown.makeHtml(newValue);
-              //scope.trustedHtml = ($showdown.getOption('sanitize')) ? $sanitize(showdownHTML) : $sce.trustAsHtml(showdownHTML);
               scope.trustedHtml = showdownHTML;
-              
             } else {
               scope.trustedHtml = typeof newValue;
             }
+          }
+
+          // watch the markdown model
+          scope.$watch('model', function (newValue) {
+            render(newValue);
+          });
+
+          // watch the converter options — render again whenever options change
+          scope.$watch(function () {
+            try {
+              return angular.toJson($showdown.getOptions());
+            } catch (e) {
+              return '';
+            }
+          }, function () {
+            render(scope.model);
           });
         };
       }
 
-      /**
-       * AngularJS Filter to Strip HTML tags from text
-       *
-       * @returns {Function}
-       */
       function stripHtmlFilter($showdown) {
         return function (text) {
           return $showdown.stripHtml(text);
@@ -213,18 +136,13 @@ window.onload = function () {
     })(angular.module('ng-showdown', ['ngSanitize']), showdown);
 
   } else {
-    document.cookie = 'version=develop';
     throw new Error('ng-showdown was not loaded because one of its dependencies (AngularJS or Showdown) was not met');
   }
 
+  var app = angular.module('showdown.editor', ['ng-showdown', 'pageslide-directive', 'ngAnimate', 'ngRoute', 'ngSanitize']);
 
-  var app = angular.module('showdown.editor', ['ng-showdown', 'pageslide-directive', 'ngAnimate', 'ngRoute', 'ngCookies', 'ngSanitize']);
+  app.controller('editorCtrl', ['$scope', '$showdown', '$http', function ($scope, $showdown, $http) {
 
-  
-  app.controller('editorCtrl', ['$scope', '$showdown', '$http', '$cookies', '$sanitize', function ($scope, $showdown, $http, $cookies, $sanitize) {
-
-    $scope.versions = ['develop', 'master'];
-    $scope.version = $cookies.get('version') || 'develop';
     $scope.showModal = false;
     $scope.hashTxt = '';
     $scope.checked = false;
@@ -235,9 +153,6 @@ window.onload = function () {
     $scope.textOpts = [];
 
     var text = '';
-    var savedCheckOpts = $cookies.getObject('checkOpts') || [];
-    var savedNumOpts = $cookies.getObject('numOpts') || [];
-    var savedTextOpts = $cookies.getObject('textOpts') || [];
     var defaultOpts = $showdown.getDefaultOptions(false);
     var checkOpts = {
       'omitExtraWLInCodeBlocks': true,
@@ -275,7 +190,6 @@ window.onload = function () {
             }
           } else {
             if (!textOpts.hasOwnProperty(opt)) {
-              // fix bug in showdown's older version that specifies 'ghCompatibleHeaderId' as a string instead of boolean
               if (opt === 'ghCompatibleHeaderId') {
                 continue;
               }
@@ -307,33 +221,6 @@ window.onload = function () {
       }
     }
 
-    for (var i = 0; i < $scope.checkOpts.length; ++i) {
-		for (var ii = 0; ii < savedCheckOpts.length; ++ii) {
-			if ($scope.checkOpts[i].name === savedCheckOpts[ii].name) {
-				$scope.checkOpts[i].value = savedCheckOpts[ii].value;
-				break;
-			}
-		}
-	}
-
-    for (i = 0; i < $scope.numOpts.length; ++i) {
-      for (ii = 0; ii < savedNumOpts.length; ++ii) {
-        if ($scope.numOpts[i].name === savedNumOpts[ii].name) {
-          $scope.numOpts[i].value = savedNumOpts[ii].value;
-          break;
-        }
-      }
-    }
-
-    for (i = 0; i < $scope.textOpts.length; ++i) {
-      for (ii = 0; ii < savedTextOpts.length; ++ii) {
-        if ($scope.textOpts[i].name === savedTextOpts[ii].name) {
-          $scope.textOpts[i].value = savedTextOpts[ii].value;
-          break;
-        }
-      }
-    }
-
     $scope.toggleMenu = function () {
       $scope.firstLoad = false;
       $scope.checked = !$scope.checked;
@@ -346,12 +233,6 @@ window.onload = function () {
 
     $scope.closeModal = function () {
       $scope.showModal = false;
-    };
-
-    $scope.loadVersion = function () {
-      $cookies.put('version', $scope.version);
-      sessionStorage.setItem("text", $scope.text);
-      location.reload();
     };
 
     $scope.updateOptions = function () {
@@ -374,33 +255,15 @@ window.onload = function () {
         $showdown.setOption($scope.textOpts[i].name, $scope.textOpts[i].value);
       }
 
-      $cookies.putObject('checkOpts', $scope.checkOpts);
-      $cookies.putObject('numOpts', $scope.numOpts);
-      $cookies.putObject('textOpts', $scope.textOpts);
+      // No persistence: do not save cookies or sessionStorage. The directive watches converter options and will re-render.
     };
 
     $scope.repaint = function () {
-      sessionStorage.setItem("text", $scope.text);
-      console.log($cookies.getAll()); // this is to force cookies to update
-      location.reload();
+      // trigger a re-render by calling updateOptions (directive watches getOptions)
+      $scope.updateOptions();
     };
 
-    //load available versions
-    $http.get('https://api.github.com/repos/showdownjs/showdown/releases')
-      .then(
-      function (response) {
-        for (var i = 0; i < response.data.length; ++i) {
-          if (compareVersions(response.data[i].tag_name, '1.0.0') >= 0) {
-            $scope.versions.push(response.data[i].tag_name);
-          }
-        }
-      },
-      function (error) {
-        console.error('Error retrieving versions', error);
-      }
-    );
-
-    $scope.updateOptions(false);
+    $scope.updateOptions();
 
     // get text from URL or load the default text
     if (window.location.hash) {
@@ -408,8 +271,6 @@ window.onload = function () {
       console.log(window.location.hash, hashText);
       hashText = decodeURIComponent(hashText);
       $scope.text = hashText;
-    } else if (sessionStorage.getItem('text')) {
-      $scope.text = sessionStorage.getItem('text');
     } else {
       var defHtml = $http.get('md/text.md');
       defHtml
