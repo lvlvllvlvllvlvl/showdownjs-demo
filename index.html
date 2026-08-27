@@ -42,21 +42,17 @@
       <div class="lateral-menu-content-inner">
 
         <div ng-repeat="opt in checkOpts">
-          <input id="checkOpt-{{$id}}" ng-click="updateOptions(); repaint();" type="checkbox" ng-model="opt.value" />
+          <input id="checkOpt-{{$id}}" ng-click="updateOptions();" type="checkbox" ng-model="opt.value" />
           <label for="checkOpt-{{$id}}" class="inline">{{opt.name}}</label>
         </div>
         <hr>
         <div ng-repeat="opt in numOpts">
           <label for="option-{opt.name}">{{opt.name}}</label>
-          <input id="option-{opt.name}" ng-change="updateOptions(); repaint();" type="number" ng-model="opt.value"/>
+          <input id="option-{opt.name}" ng-change="updateOptions();" type="number" ng-model="opt.value"/>
         </div>
         <div ng-repeat="opt in textOpts">
           <label for="option-{opt.name}">{{opt.name}}</label>
-          <input id="textOption-{opt.name}" data-ng-change="updateOptions(); repaint();" type="text" ng-model="opt.value"/>
-        </div>
-        <div>
-          <label for="showdownVersion">Showdown Version</label>
-          <select id="showdownVersion" ng-model="version" ng-options="v for v in versions" ng-change="loadVersion()"></select>
+          <input id="textOption-{opt.name}" data-ng-change="updateOptions();" type="text" ng-model="opt.value"/>
         </div>
       </div>
     </div>
@@ -80,7 +76,6 @@
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-sanitize.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-route.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-cookies.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-pageslide-directive/2.2.0/angular-pageslide-directive.js"
   integrity="sha256-FW2YsacWIn83+j6c02CWOR8fuY4WyzbmmGwz7VOdEI0=" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/gh/showdownjs/showdown@master/dist/showdown.min.js"></script>
