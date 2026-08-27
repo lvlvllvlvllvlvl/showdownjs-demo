@@ -27,26 +27,6 @@
   <meta name="msapplication-TileColor" content="#2b5797">
   <meta name="msapplication-TileImage" content="img/mstile-144x144.png">
   <meta name="theme-color" content="#ffffff">
-  
-  <!-- conditional load of showdown's version based on the cookie -->
-  <script>
-    (function() {
-      function getCookie(name) {
-        var value = "; " + document.cookie;
-        var parts = value.split("; " + name + "=");
-        if (parts.length === 2) return parts.pop().split(";").shift();
-      }
-
-      var ver = getCookie('version') || 'develop',
-          url = 'https://rawgit.com/showdownjs/showdown/' + ver + '/dist/showdown.min.js',
-          scrp = document.createElement('script');
-
-      scrp.setAttribute("type","text/javascript");
-      scrp.src = url;
-      document.getElementsByTagName("head")[0].appendChild(scrp);
-    })();
-  </script>
-
 </head>
 <body data-ng-controller="editorCtrl">
 
@@ -96,13 +76,14 @@
   <!-- end modal -->
 
   <script src="js/semver.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.5/angular.min.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.5/angular-sanitize.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.5/angular-animate.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.5/angular-route.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.5/angular-cookies.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-pageslide-directive/2.2.0/angular-pageslide-directive.js" integrity="sha256-FW2YsacWIn83+j6c02CWOR8fuY4WyzbmmGwz7VOdEI0=" crossorigin="anonymous"></script>
-
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-sanitize.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-route.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-cookies.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-pageslide-directive/2.2.0/angular-pageslide-directive.js"
+  integrity="sha256-FW2YsacWIn83+j6c02CWOR8fuY4WyzbmmGwz7VOdEI0=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/gh/showdownjs/showdown@master/dist/showdown.min.js"></script>
   <script src="js/editor.js"></script>
 </body>
 </html>
