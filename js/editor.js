@@ -103,7 +103,8 @@ window.onload = function () {
             var showdownHTML;
             if (typeof newValue === 'string') {
               showdownHTML = $showdown.makeHtml(newValue);
-              scope.trustedHtml = showdownHTML;
+              // Trust the HTML so ng-bind-html doesn't strip checkboxes and other elements
+              scope.trustedHtml = $sce.trustAsHtml(showdownHTML);
             } else {
               scope.trustedHtml = typeof newValue;
             }
@@ -267,7 +268,7 @@ window.onload = function () {
 
     // get text from URL or load the default text
     if (window.location.hash) {
-      var hashText = window.location.hash.replace(/^#!(\/)?/, '');
+      var hashText = window.location.hash.replace(/^#!(/)?/, '');
       console.log(window.location.hash, hashText);
       hashText = decodeURIComponent(hashText);
       $scope.text = hashText;
